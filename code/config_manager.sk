@@ -1,0 +1,24 @@
+options:
+    main_directory: plugins/Skript/scripts/FactionsCore/configs
+    
+    configs: "sandbots" and "shields"
+
+on load:
+    send "&c[FactionsCore]&a Commencing config loading..."
+    loop {@configs}:
+        load yaml "{@main_directory}/%loop-value%.yml" as "config.%loop-value%"
+        send "&c[FactionsCore]&7 Loaded %loop-value%.yml as config.%loop-value%"
+
+function fc_config_manager_getvalue(dir: text, value: text) :: object:
+    return yaml value {_value} from "config.%{_dir}%"
+
+function fc_config_manager_setvalue(dir: text, value: text, object: object):
+    set yaml value {_value} from {_dir} to {_object}
+    save yaml "config.%{_dir}%"
+
+function fc_config_manager_getlist(dir: text, value: text) :: objects:
+    return yaml list {_value} from "config.%{_dir}%"
+
+function fc_config_manager_setlist(dir: text, value: text, object: objects):
+    set yaml list {_value} from "config.%{_dir}%" to {_object}
+    save yaml "config.%{_dir}%"

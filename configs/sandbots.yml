@@ -1,0 +1,106 @@
+messages:
+    must-be-in-a-faction: '&cYou must be in a faction to place a sandbot.'
+    sandbot-menu-must-be-in-a-faction: '&cYou must be in a faction to use this command.'
+    no-sandbots-placed: '&cYour faction does not have any sandbots currently placed.'
+    only-in-own-claims: '&cYou can only place sandbots in your own claims.'
+    placed-sandbot: '&aYou have successfully placed a &b&nSandbot&a.'
+    broken-sandbot: '&cYou have successfully broken a &b&nSandbot&c.'
+    maximum-amount-of-sandbots: '&cYour faction has the maximum amount of sandbots placed.'
+    sandbot-not-owned: '&cYou cannot open a &b&nSandbot&c''s menu unless you own it.'
+    toggled-sandbot: '&aYou have successfully toggled the &b&nSandbot&8 [&f{sandbot_state}&8]'
+    insufficient-funds: '&cYou do not have the minimum amount required to deposit
+        into the &b&nSandbot&c.'
+    successfully-deposited: '&aYou have successfully deposited &a&n${amount}&a into
+        the &b&nSandbot&a.'
+    no-money-to-withdraw: '&cThere''s no money in the &b&nSandbot&c to withdraw.'
+    withdrawn-successfully: '&aYou have withdrawn &a&n${sandbot_balance}&a from
+        the &b&nSandbot&a.'
+
+sandbot:
+    faction-limit: 9 # How many sandbots 1 faction can have at a time
+    sand-price: 8 # How much money each sand generated costs
+    deposit-amount: 5000 # How much you can deposit into the sandbot at a time
+    sandbot-radius: 16 # The radius in which the sandbot will place blocks
+    place-under: "RED WOOL" # The sandbot will place under red wool
+    item:
+      type: "CRYING OBSIDIAN"
+      name: "&b&nSandbot"
+      glowing: true
+      lore:
+        - ""
+        - "&7Place down this robot to place"
+        - "&7sand underneath nearby &c&nRed Wool&7."
+        - ""
+        - "&b&lINFORMATION:"
+        - "&7  Radius: &f16 Blocks"
+        - "&7  Sand Price (per): &a$8"
+        - ""
+
+list-gui:
+  name: "&8Sandbot List" # Make sure the name of this GUI is unique
+  rows: 1
+  fill-item: "BLACK STAINED GLASS PANE"
+
+  sandbot:
+    type: "sand"
+    name: "&6Sandbot #{number}"
+    lore:
+      - ""
+      - "&6&lINFORMATION:"
+      - "&7  World: &f{world}"
+      - "&7  Coords: &fX:{x}, Y:{y}, Z:{z}"
+      - ""
+      - "&6Click to manage this sandbot."
+
+gui:
+  name: "&8Sandbot Manager" # Make sure the name of this GUI is unique
+  rows: 3
+  fill-item: "BLACK STAINED GLASS PANE"
+
+  toggle:
+    type: "FEATHER"
+    slot: 10
+    name: "&bToggle Sandbot"
+    lore:
+      - ""
+      - "&7Toggle whether the &b&nSandbot&7 is on or off."
+      - ""
+      - "&b&lINFORMATION:"
+      - "&7  Toggled: &f{sandbot_toggle}"
+      - ""
+      - "&bClick to Toggle This Sandbot."
+  
+  deposit:
+    type: "PAPER"
+    slot: 12
+    name: "&aSandbot Balance"
+    lore:
+      - ""
+      - "&7Add or subtract money from the &b&nSandbot&7."
+      - ""
+      - "&a&lINFORMATION:"
+      - "&7  Balance: &f${sandbot_balance}"
+      - ""
+      - "&aLeft Click to Deposit $5,000"
+      - "&aRight Click to Withdraw All"
+  
+  remove:
+    type: "BARRIER"
+    slot: 14
+    name: "&cRemove Sandbot"
+    lore:
+      - ""
+      - "&7Delete this sandbot."
+      - ""
+      - "&cClick to remove this sandbot."
+  
+  list:
+    type: "CANDLE"
+    slot: 16
+    name: "&eView all sandbots"
+    lore:
+      - ""
+      - "&7View and manage all sandbots"
+      - "&7your faction has placed down."
+      - ""
+      - "&eClick to open the sandbot list menu."

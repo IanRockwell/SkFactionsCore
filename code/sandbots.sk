@@ -1,0 +1,297 @@
+import:
+	com.massivecraft.factions.FLocation
+	com.massivecraft.factions.Board
+	com.massivecraft.factions.Faction
+	com.massivecraft.factions.Factions
+	com.massivecraft.factions.FPlayer
+	com.massivecraft.factions.FPlayers
+
+on command "f":
+	set {_args::*} to full command split by " "
+	{_args::2} is "sandbot" or "sandbots"
+	cancel event
+	set {_player-faction} to FPlayers.getInstance().getByPlayer(player).getFaction()
+	set {_player-faction.name} to uncoloured {_player-faction}.getTag()
+	if {_player-faction.name} is "Wilderness":
+		send fc_config_manager_getvalue("sandbots", "messages.sandbot-menu-must-be-in-a-faction")
+		stop
+	set {_player-faction.id} to Factions.getInstance().getByTag("%{_player-faction.name}%").getId()
+	if size of fc_sandbot_getsandbots({_player-faction.id}) is 0:
+		send fc_config_manager_getvalue("sandbots", "messages.no-sandbots-placed")
+		stop
+	fc_sandbot_openlistgui(player, {_player-faction.id})
+
+function fc_sandbot_registerfromlocation(radius: integer, block: item type, loc: location, faction: text) :: locations:
+	loop blocks in radius {_radius} around {_loc}:
+		loop-block is {_block}
+		set {_block-faction} to Board.getInstance().getFactionAt(new FLocation(location of loop-block))
+		set {_block-faction.name} to uncoloured {_block-faction}.getTag()
+		set {_block-faction.id} to Factions.getInstance().getByTag("%{_block-faction.name}%").getId()
+		"%{_block-faction.id}%" is "%{_faction}%"
+		add loop-block's location to {_locations::*}
+	return {_locations::*}
+
+function fc_sandbot_formatlocationforyaml(l: location) :: text:
+	set {_loc} to "%{_l}%"
+	replace all "." in {_loc} with "(dot)"
+	return {_loc}
+
+function fc_sandbot_makeglow(i: item) :: item:
+	enchant {_i} with unbreaking 1
+	return {_i} with all flags hidden
+
+function fc_sandbot_getsandbots(faction: text) :: objects:
+	return fc_data_manager_returnnodelist("sandbots", "%{_faction}%.sandbots")
+	
+function fc_sandbot_register(l: location, faction: text):
+	set {_formatted-yaml-loc} to fc_sandbot_formatlocationforyaml({_l}) 
+	fc_data_manager_setvalue("sandbots", "%{_faction}%.sandbots.%{_formatted-yaml-loc}%.location", {_l})
+	fc_data_manager_setvalue("sandbots", "%{_faction}%.sandbots.%{_formatted-yaml-loc}%.faction", {_faction})
+	fc_data_manager_setvalue("sandbots", "%{_faction}%.sandbots.%{_formatted-yaml-loc}%.balance", 0)
+	fc_data_manager_setvalue("sandbots", "%{_faction}%.sandbots.%{_formatted-yaml-loc}%.toggled", "false")
+
+function fc_sandbot_unregister(l: location, faction: text):
+	set {_formatted-yaml-loc} to fc_sandbot_formatlocationforyaml({_l}) 
+	set block at location of {_l} to air
+	fc_data_manager_delvalue("sandbots", "%{_faction}%.sandbots.%{_formatted-yaml-loc}%")
+	remove "%{_faction}%.sandbots.%{_formatted-yaml-loc}%" from {sandbot-toggled::*}
+
+function fc_sandbot_generateitem() :: item:
+	set {_item} to fc_config_manager_getvalue("sandbots", "sandbot.item.type") parsed as item type
+	set {_item}'s name to fc_config_manager_getvalue("sandbots", "sandbot.item.name")
+	set {_item}'s lore to colored fc_config_manager_getlist("sandbots", "sandbot.item.lore")
+	if fc_config_manager_getvalue("sandbots", "sandbot.item.glowing") is true:
+		set {_item} to fc_sandbot_makeglow({_item})
+	return {_item}
+
+function tc_sandbot_opengui(p: player):
+	set {_gui} to chest inventory with fc_config_manager_getvalue("sandbots", "gui.rows") rows named fc_config_manager_getvalue("sandbots", "gui.name")
+	
+	set {_nbt} to nbt of block at (metadata value "FC;SandbotLocation" of {_p})
+	set {_formatted-yaml-loc} to fc_sandbot_formatlocationforyaml(metadata value "FC;SandbotLocation" of {_p}) 
+
+	set {_toggled} to string tag "custom;sandbot_toggled" of {_nbt}
+	set {_faction} to string tag "custom;sandbot_faction" of {_nbt}
+	set {_balance} to fc_data_manager_getvalue("sandbots", "%{_faction}%.sandbots.%{_formatted-yaml-loc}%.balance")
+
+	set slot (all integers between 0 and 54) of {_gui} to fc_config_manager_getvalue("sandbots", "gui.fill-item") parsed as item named "&7"
+	
+	set {_toggle-slot} to fc_config_manager_getvalue("sandbots", "gui.toggle.slot")
+	set {_toggle-item} to fc_config_manager_getvalue("sandbots", "gui.toggle.type") parsed as item
+	set {_toggle-name} to fc_config_manager_getvalue("sandbots", "gui.toggle.name")
+	set {_toggle-lore::*} to colored fc_config_manager_getlist("sandbots", "gui.toggle.lore")
+	replace all "{sandbot_toggle}" in {_toggle-lore::*} with {_toggled}
+	set slot {_toggle-slot} of {_gui} to {_toggle-item} named {_toggle-name} with lore {_toggle-lore::*}
+
+	set {_deposit-slot} to fc_config_manager_getvalue("sandbots", "gui.deposit.slot")
+	set {_deposit-item} to fc_config_manager_getvalue("sandbots", "gui.deposit.type") parsed as item
+	set {_deposit-name} to fc_config_manager_getvalue("sandbots", "gui.deposit.name")
+	set {_deposit-lore::*} to colored fc_config_manager_getlist("sandbots", "gui.deposit.lore")
+	replace all "{sandbot_balance}" in {_deposit-lore::*} with "%{_balance}%"
+	set slot {_deposit-slot} of {_gui} to {_deposit-item} named {_deposit-name} with lore {_deposit-lore::*}
+
+	set {_remove-slot} to fc_config_manager_getvalue("sandbots", "gui.remove.slot")
+	set {_remove-item} to fc_config_manager_getvalue("sandbots", "gui.remove.type") parsed as item
+	set {_remove-name} to fc_config_manager_getvalue("sandbots", "gui.remove.name")
+	set {_remove-lore::*} to colored fc_config_manager_getlist("sandbots", "gui.remove.lore")
+	set slot {_remove-slot} of {_gui} to {_remove-item} named {_remove-name} with lore {_remove-lore::*}
+
+	set {_list-slot} to fc_config_manager_getvalue("sandbots", "gui.list.slot")
+	set {_list-item} to fc_config_manager_getvalue("sandbots", "gui.list.type") parsed as item
+	set {_list-name} to fc_config_manager_getvalue("sandbots", "gui.list.name")
+	set {_list-lore::*} to colored fc_config_manager_getlist("sandbots", "gui.list.lore")
+	set slot {_list-slot} of {_gui} to {_list-item} named {_list-name} with lore {_list-lore::*}
+
+	open {_gui} to {_p}
+
+function fc_sandbot_openlistgui(p: player, faction: text):
+	set {_gui} to chest inventory with fc_config_manager_getvalue("sandbots", "list-gui.rows") rows named fc_config_manager_getvalue("sandbots", "list-gui.name")
+	set slot (all integers between 0 and 54) of {_gui} to fc_config_manager_getvalue("sandbots", "list-gui.fill-item") parsed as item named "&7"
+	set {_sandbots::*} to fc_sandbot_getsandbots({_faction})
+
+	set {_slot} to -1
+	loop {_sandbots::*}:
+		add 1 to {_slot}
+		set {_list-item} to fc_config_manager_getvalue("sandbots", "list-gui.sandbot.type") parsed as item
+		set {_list-name} to fc_config_manager_getvalue("sandbots", "list-gui.sandbot.name")
+		set {_list-lore::*} to colored fc_config_manager_getlist("sandbots", "list-gui.sandbot.lore")
+
+		set {_location} to fc_data_manager_getvalue("sandbots", "%{_faction}%.sandbots.%loop-value%.location")
+		replace all "{world}" in {_list-lore::*} with "%{_location}'s world%"
+		replace all "{x}" in {_list-lore::*} with "%round({_location}'s x coordinate)%"
+		replace all "{y}" in {_list-lore::*} with "%round({_location}'s y coordinate)%"
+		replace all "{z}" in {_list-lore::*} with "%round({_location}'s z coordinate)%"
+		replace all "{number}" in {_list-name} with "%{_slot} + 1%"
+
+		set {_item} to {_list-item} named {_list-name} with lore {_list-lore::*}
+		set string tag "custom;sandbot_yml" of nbt compound of {_item} to loop-value
+		set string tag "custom;sandbot_faction" of nbt compound of {_item} to {_faction}
+
+		set slot {_slot} of {_gui} to {_item}
+	open {_gui} to {_p}
+
+on place:
+	1 of player's tool is fc_sandbot_generateitem()
+	event is not cancelled
+	set {_player-faction} to FPlayers.getInstance().getByPlayer(player).getFaction()
+	set {_player-faction.name} to uncoloured {_player-faction}.getTag()
+	if {_player-faction.name} is "Wilderness":
+		cancel event
+		send fc_config_manager_getvalue("sandbots", "messages.must-be-in-a-faction")
+		stop
+	
+	set {_block-faction} to Board.getInstance().getFactionAt(new FLocation(event-location))
+	if {_player-faction} is not equal to {_block-faction}:
+		cancel event
+		send fc_config_manager_getvalue("sandbots", "messages.only-in-own-claims")
+		stop
+	
+	set {_player-faction.id} to Factions.getInstance().getByTag("%{_player-faction.name}%").getId()
+
+	if size of (fc_sandbot_getsandbots("%{_player-faction.id}%")) is fc_config_manager_getvalue("sandbots", "sandbot.faction-limit"):
+		cancel event
+		send fc_config_manager_getvalue("sandbots", "messages.maximum-amount-of-sandbots")
+		stop
+
+	fc_sandbot_register(event-location, "%{_player-faction.id}%")
+
+	set string tag "custom;sandbot_faction" of nbt compound of event-block to "%{_player-faction.id}%"
+	set string tag "custom;sandbot_toggled" of nbt compound of event-block to "false"
+
+	send fc_config_manager_getvalue("sandbots", "messages.placed-sandbot")
+
+on break:
+	event-block is fc_config_manager_getvalue("sandbots", "sandbot.item.type") parsed as item type
+	set {_sandbot-faction} to string tag "custom;sandbot_faction" of nbt of event-block
+	{_sandbot-faction} is set
+	cancel event
+	fc_sandbot_unregister(event-location, "%{_sandbot-faction}%")
+	send fc_config_manager_getvalue("sandbots", "messages.broken-sandbot")
+	drop fc_sandbot_generateitem() at event-location
+
+on right click:
+	event-block is fc_config_manager_getvalue("sandbots", "sandbot.item.type") parsed as item type
+	set {_sandbot-faction} to int tag "custom;sandbot_faction" of nbt of event-block
+	{_sandbot-faction} is set
+	cancel event
+	set metadata value "FC;SandbotLocation" of player to location of event-block
+	tc_sandbot_opengui(player)
+
+on inventory click:
+	name of player's current inventory is fc_config_manager_getvalue("sandbots", "gui.name")
+	cancel event
+	clicked inventory is player's current inventory
+
+	set {_nbt} to nbt of block at (metadata value "FC;SandbotLocation" of player)
+	set {_formatted-yaml-loc} to fc_sandbot_formatlocationforyaml(metadata value "FC;SandbotLocation" of player)
+
+	set {_toggled} to string tag "custom;sandbot_toggled" of {_nbt}
+	set {_faction} to string tag "custom;sandbot_faction" of {_nbt}
+	set {_balance} to fc_data_manager_getvalue("sandbots", "%{_faction}%.sandbots.%{_formatted-yaml-loc}%.balance")
+	
+	{_faction} is set # This check is to stop the possible dupe of removing the sandbot while
+					  # someone is still in the inventory, so u can get the money out twice.
+
+	if index of clicked slot is fc_config_manager_getvalue("sandbots", "gui.toggle.slot"):
+		if {_toggled} is "false":
+			set string tag "custom;sandbot_toggled" of nbt compound of block at (metadata value "FC;SandbotLocation" of player) to "true"
+			fc_data_manager_setvalue("sandbots", "%{_faction}%.sandbots.%{_formatted-yaml-loc}%.toggled", "true")
+			set {_message} to fc_config_manager_getvalue("sandbots", "messages.toggled-sandbot")
+			replace all "{sandbot_state}" in {_message} with "true"
+			send {_message}
+
+			add "%{_faction}%.sandbots.%{_formatted-yaml-loc}%" to {sandbot-toggled::*}
+
+			set {_radius} to fc_config_manager_getvalue("sandbots", "sandbot.sandbot-radius")
+			set {_block} to fc_config_manager_getvalue("sandbots", "sandbot.place-under") parsed as item type
+			
+			set {_locations::*} to fc_sandbot_registerfromlocation({_radius}, {_block}, (metadata value "FC;SandbotLocation" of player), "%{_faction}%")
+			fc_data_manager_setlist("sandbots", "%{_faction}%.sandbots.%{_formatted-yaml-loc}%.locations", {_locations::*})
+		else:
+			set string tag "custom;sandbot_toggled" of nbt compound of block at (metadata value "FC;SandbotLocation" of player) to "false"
+			fc_data_manager_setvalue("sandbots", "%{_faction}%.sandbots.%{_formatted-yaml-loc}%.toggled", "false")
+			set {_message} to fc_config_manager_getvalue("sandbots", "messages.toggled-sandbot")
+			replace all "{sandbot_state}" in {_message} with "false"
+			send {_message}
+
+			remove "%{_faction}%.sandbots.%{_formatted-yaml-loc}%" from {sandbot-toggled::*}
+
+			fc_data_manager_dellist("sandbots", "%{_faction}%.sandbots.%{_formatted-yaml-loc}%.locations")
+
+		tc_sandbot_opengui(player)
+		stop
+	
+	else if index of clicked slot is fc_config_manager_getvalue("sandbots", "gui.deposit.slot"):
+		if click type is left mouse:
+			set {_deposit-amount} to fc_config_manager_getvalue("sandbots", "sandbot.deposit-amount")
+			if player's balance is less than {_deposit-amount}:
+				send fc_config_manager_getvalue("sandbots", "messages.insufficient-funds")
+				stop
+			subtract {_deposit-amount} from player's balance
+			add 5000 to {_balance}
+			fc_data_manager_setvalue("sandbots", "%{_faction}%.sandbots.%{_formatted-yaml-loc}%.balance", {_balance})
+			set {_message} to fc_config_manager_getvalue("sandbots", "messages.successfully-deposited")
+			replace all "{amount}" in {_message} with "%{_deposit-amount}%"
+			send {_message}
+		else if click type is right mouse:
+			if {_balance} is 0:
+				fc_config_manager_getvalue("sandbots", "messages.no-money-to-withdraw")
+				stop
+			add {_balance} to player's balance
+			fc_data_manager_setvalue("sandbots", "%{_faction}%.sandbots.%{_formatted-yaml-loc}%.balance", 0)
+			set {_message} to fc_config_manager_getvalue("sandbots", "messages.withdrawn-successfully")
+			replace all "{sandbot_balance}" in {_message} with "%{_balance}%"
+			send {_message}
+		tc_sandbot_opengui(player)
+		stop
+	
+	else if index of clicked slot is fc_config_manager_getvalue("sandbots", "gui.remove.slot"):
+		fc_sandbot_unregister((metadata value "FC;SandbotLocation" of player), "%{_faction}%")
+		
+		add fc_sandbot_generateitem() to player's inventory
+		send fc_config_manager_getvalue("sandbots", "messages.broken-sandbot")
+		close player's inventory
+		stop
+	
+	else if index of clicked slot is fc_config_manager_getvalue("sandbots", "gui.list.slot"):
+		fc_sandbot_openlistgui(player, "%{_faction}%")
+
+on inventory click:
+	name of player's current inventory is fc_config_manager_getvalue("sandbots", "list-gui.name")
+	cancel event
+	clicked inventory is player's current inventory
+	set {_nbt} to nbt compound of clicked slot
+	set {_sandbot} to string tag "custom;sandbot_yml" of {_nbt}
+	set {_faction} to string tag "custom;sandbot_faction" of {_nbt}
+
+	set {_location} to fc_data_manager_getvalue("sandbots", "%{_faction}%.sandbots.%{_sandbot}%.location")
+	{_location} is set
+	set metadata value "FC;SandbotLocation" of player to {_location}
+	tc_sandbot_opengui(player)
+
+every 0.3 seconds:
+	loop {sandbot-toggled::*}:
+		set {_blocks::*} to fc_data_manager_getlist("sandbots", "%loop-value%.locations")
+		set {_balance} to fc_data_manager_getvalue("sandbots", "%loop-value%.balance")
+		set {_location} to fc_data_manager_getvalue("sandbots", "%loop-value%.location")
+		set {_sand-price} to fc_config_manager_getvalue("sandbots", "sandbot.sand-price")
+		if {_balance} is less than {_sand-price} * size of {_blocks::*}:
+			delete {sandbot-toggled::%loop-index%}
+			set string tag "custom;sandbot_toggled" of nbt compound of block at {_location} to "false"
+			fc_data_manager_setvalue("sandbots", "%loop-value%.toggled", "false")
+			fc_data_manager_dellist("sandbots", "%loop-value%.locations")
+		else:
+			loop {_blocks::*}:
+				block below loop-value-2 is air
+				set {_blocks-placed} to true 
+				set block at block below loop-value-2 to sand
+			{_blocks-placed} is set
+			subtract {_sand-price} * size of {_blocks::*} from {_balance}
+			fc_data_manager_setvalue("sandbots", "%loop-value%.balance", {_balance})
+
+on load:
+	loop {sandbot-toggled::*}:
+		delete {sandbot-toggled::%loop-index%}
+		set string tag "custom;sandbot_toggled" of nbt compound of block at {_location} to "false"
+		fc_data_manager_setvalue("sandbots", "%loop-value%.toggled", "false")
+		fc_data_manager_dellist("sandbots", "%loop-value%.locations")

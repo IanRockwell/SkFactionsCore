@@ -1,0 +1,33 @@
+options:
+    main_directory: plugins/Skript/scripts/FactionsCore/data
+
+    data: "players", "factions" and "sandbots"
+on load:
+    send "&c[FactionsCore]&a Commencing data loading..."
+    loop {@data}:
+        load yaml "{@main_directory}/%loop-value%.yml" as "data.%loop-value%"
+        send "&c[FactionsCore]&7 Loaded %loop-value%.yml as data.%loop-value%"
+function fc_data_manager_getvalue(dir: text, value: text) :: object:
+    return yaml value {_value} from "data.%{_dir}%"
+
+function fc_data_manager_setvalue(dir: text, value: text, object: object):
+    set yaml value {_value} from "data.%{_dir}%" to {_object}
+    save yaml "data.%{_dir}%"
+
+function fc_data_manager_delvalue(dir: text, value: text):
+    delete yaml value {_value} from "data.%{_dir}%"
+    save yaml "data.%{_dir}%"
+
+function fc_data_manager_getlist(dir: text, value: text) :: objects:
+    return yaml list {_value} from "data.%{_dir}%"
+
+function fc_data_manager_setlist(dir: text, value: text, object: objects):
+    set yaml list {_value} from "data.%{_dir}%" to {_object::*}
+    save yaml "data.%{_dir}%"
+
+function fc_data_manager_dellist(dir: text, value: text):
+    delete yaml list {_value} from "data.%{_dir}%"
+    save yaml "data.%{_dir}%"
+
+function fc_data_manager_returnnodelist(dir: text, value: text) :: objects:
+    return yaml node keys {_value} from "data.%{_dir}%"
