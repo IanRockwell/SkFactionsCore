@@ -1,2 +1,2 @@
 # SkFactionsCore
-A completely open source Factions Core written completely in Skript
+A completely open source Minecraft Factions Core written completely in Skript
