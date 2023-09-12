@@ -6,6 +6,22 @@ import:
 	com.massivecraft.factions.FPlayer
 	com.massivecraft.factions.FPlayers
 
+command /sandbot [<text>] [<offline player>] [<integer>]:
+	description: FactionCore's Sandbot Command
+	permission: fc.sandbot.admin
+	trigger:
+		if arg 1 is "give":
+			if arg 2 is not online:
+				send "&cThe player you specified is not online."
+				stop
+			set {_amt} to arg 3 ? 1
+			set {_sandbot} to fc_sandbot_generateitem()
+			add {_amt} of {_sandbot} to arg 2's inventory
+			send "&aYou have given &n%arg 2%&a %{_amt}% x %name of {_sandbot}%&a."
+			stop
+		send "&e/f sandbot &7- &fOpen the faction sandbot menu"
+		send "&e/sandbot give <player> <amount> &7- &fGive a player a sandbot"
+
 on command "f":
 	set {_args::*} to full command split by " "
 	{_args::2} is "sandbot" or "sandbots"
