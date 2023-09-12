@@ -1,6 +1,10 @@
 # SkFactionsCore
 A completely open source Minecraft Factions Core written completely in Skript
 
+## Features
+`Sandbots` <br />
+`Genbuckets` <br />
+
 ## Dependencies
 `Plugins:` <br />
 `  Vault` <br />
