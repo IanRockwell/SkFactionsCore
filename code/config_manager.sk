@@ -1,7 +1,7 @@
 options:
     main_directory: plugins/Skript/scripts/SkFactionsCore/configs
     
-    configs: "sandbots" and "shields"
+    configs: "sandbots", "genbuckets" and "shields"
 
 on load:
     send "&c[FactionsCore]&a Commencing config loading..."
@@ -20,5 +20,8 @@ function fc_config_manager_getlist(dir: text, value: text) :: objects:
     return yaml list {_value} from "config.%{_dir}%"
 
 function fc_config_manager_setlist(dir: text, value: text, object: objects):
-    set yaml list {_value} from "config.%{_dir}%" to {_object}
+    set yaml list {_value} from "config.%{_dir}%" to {_object::*}
     save yaml "config.%{_dir}%"
+
+function fc_config_manager_returnnodelist(dir: text, value: text) :: objects:
+    return yaml node keys {_value} from "config.%{_dir}%"
