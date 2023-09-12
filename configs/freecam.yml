@@ -8,6 +8,7 @@ messages:
 
 freecam:
   max-distance: 300
+  action-bar: "&aFreecam Enabled &8(&7{blocks} Blocks&8)"
   whitelist-commands:
     - "freecam"
     - "roam"

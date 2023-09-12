@@ -48,9 +48,13 @@ function fc_freecam_enable(p: player, l: location):
 
     # Continuously check if the player goes out of range and teleport them back.
     while {roam::%{_uuid}%} is set:
-        if distance between {roam::%{_uuid}%} and {_p}'s location is greater than {_distance}:
-            teleport {_p} to {roam::%{_uuid}%}
+        set {_dis} to distance between {roam::%{_uuid}%} and {_p}'s location
+        if {_dis} is greater than {_distance}:
+            fc_freecam_disable({_p})
             send fc_config_manager_getvalue("freecam", "messages.went-out-of-range") to {_p}
+        set {_actionbar} to fc_config_manager_getvalue("freecam", "freecam.action-bar")
+        replace all "{blocks}" in {_actionbar} with "%round({_dis})%"
+        send action bar {_actionbar} to {_p}
         wait 5 ticks
 
 # Stop player from teleporting while in roam
