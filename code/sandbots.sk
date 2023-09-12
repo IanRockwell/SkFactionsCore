@@ -1,4 +1,5 @@
 import:
+	# Import necessary classes from the factions plugin.
 	com.massivecraft.factions.FLocation
 	com.massivecraft.factions.Board
 	com.massivecraft.factions.Faction
@@ -10,54 +11,74 @@ command /sandbot [<text>] [<offline player>] [<integer>]:
 	description: FactionCore's sandbot command
 	permission: fc.sandbot.admin
 	trigger:
+		# Check if the first argument is "give".
 		if arg 1 is "give":
+			# Check if the specified player is not online.
 			if arg 2 is not online:
 				send "&cThe player you specified is not online."
 				stop
+			# Set the amount to be given, default to 1 if not specified.
 			set {_amt} to arg 3 ? 1
+			# Add the generated sandbot item to the player's inventory.
 			add {_amt} of fc_sandbot_generateitem() to arg 2's inventory
 			send "&aYou have given &n%arg 2%&a %{_amt}% x %name of fc_sandbot_generateitem()%&a."
 			stop
+		# Display the sandbot command usage.
 		send "&e/f sandbot &7- &fOpen the faction sandbot menu"
 		send "&e/sandbot give <player> <amount> &7- &fGive a player a sandbot"
 
 on command "f":
+	# Split the command into arguments.
 	set {_args::*} to full command split by " "
+	# Check if the second argument is "sandbot" or "sandbots".
 	{_args::2} is "sandbot" or "sandbots"
 	cancel event
+	# Get the faction of the player.
 	set {_player-faction} to FPlayers.getInstance().getByPlayer(player).getFaction()
+	# Get the uncolored faction tag.
 	set {_player-faction.name} to uncoloured {_player-faction}.getTag()
+	# Check if the player is in the Wilderness faction.
 	if {_player-faction.name} is "Wilderness":
 		send fc_config_manager_getvalue("sandbots", "messages.sandbot-menu-must-be-in-a-faction")
 		stop
+	# Get the faction ID.
 	set {_player-faction.id} to Factions.getInstance().getByTag("%{_player-faction.name}%").getId()
+	# Check if there are no sandbots placed in the faction.
 	if size of fc_sandbot_getsandbots({_player-faction.id}) is 0:
 		send fc_config_manager_getvalue("sandbots", "messages.no-sandbots-placed")
 		stop
+	# Open the sandbot list GUI.
 	fc_sandbot_openlistgui(player, {_player-faction.id})
 
+# Define a function to register sandbots within a certain radius.
 function fc_sandbot_registerfromlocation(radius: integer, block: item type, loc: location, faction: text) :: locations:
 	loop blocks in radius {_radius} around {_loc}:
 		loop-block is {_block}
 		set {_block-faction} to Board.getInstance().getFactionAt(new FLocation(location of loop-block))
 		set {_block-faction.name} to uncoloured {_block-faction}.getTag()
 		set {_block-faction.id} to Factions.getInstance().getByTag("%{_block-faction.name}%").getId()
+		# Check if the block's faction matches the specified faction.
 		"%{_block-faction.id}%" is "%{_faction}%"
 		add loop-block's location to {_locations::*}
 	return {_locations::*}
 
+# Define a function to format a location for YAML storage.
 function fc_sandbot_formatlocationforyaml(l: location) :: text:
 	set {_loc} to "%{_l}%"
+	# Replace dots with "(dot)" for safe YAML usage.
 	replace all "." in {_loc} with "(dot)"
 	return {_loc}
 
+# Define a function to make an item glow.
 function fc_sandbot_makeglow(i: item) :: item:
 	enchant {_i} with unbreaking 1
 	return {_i} with all flags hidden
 
+# Define a function to get sandbots associated with a faction.
 function fc_sandbot_getsandbots(faction: text) :: objects:
 	return fc_data_manager_returnnodelist("sandbots", "%{_faction}%.sandbots")
-	
+
+# Define a function to register a sandbot.
 function fc_sandbot_register(l: location, faction: text):
 	set {_formatted-yaml-loc} to fc_sandbot_formatlocationforyaml({_l}) 
 	fc_data_manager_setvalue("sandbots", "%{_faction}%.sandbots.%{_formatted-yaml-loc}%.location", {_l})
@@ -65,21 +86,25 @@ function fc_sandbot_register(l: location, faction: text):
 	fc_data_manager_setvalue("sandbots", "%{_faction}%.sandbots.%{_formatted-yaml-loc}%.balance", 0)
 	fc_data_manager_setvalue("sandbots", "%{_faction}%.sandbots.%{_formatted-yaml-loc}%.toggled", "false")
 
+# Define a function to unregister a sandbot.
 function fc_sandbot_unregister(l: location, faction: text):
 	set {_formatted-yaml-loc} to fc_sandbot_formatlocationforyaml({_l}) 
 	set block at location of {_l} to air
 	fc_data_manager_delvalue("sandbots", "%{_faction}%.sandbots.%{_formatted-yaml-loc}%")
 	remove "%{_faction}%.sandbots.%{_formatted-yaml-loc}%" from {sandbot-toggled::*}
 
+# Define a function to generate a sandbot item.
 function fc_sandbot_generateitem() :: item:
 	set {_item} to fc_config_manager_getvalue("sandbots", "sandbot.item.type") parsed as item type
 	set {_item}'s name to fc_config_manager_getvalue("sandbots", "sandbot.item.name")
 	set {_item}'s lore to colored fc_config_manager_getlist("sandbots", "sandbot.item.lore")
+	# Check if the item should have a glowing effect.
 	if fc_config_manager_getvalue("sandbots", "sandbot.item.glowing") is true:
 		set {_item} to fc_sandbot_makeglow({_item})
 	set string tag "custom;sandbot_isreal" of nbt compound of {_item} to "true"
 	return {_item}
 
+# Define a function to open the sandbot GUI.
 function tc_sandbot_opengui(p: player):
 	set {_gui} to chest inventory with fc_config_manager_getvalue("sandbots", "gui.rows") rows named fc_config_manager_getvalue("sandbots", "gui.name")
 	
@@ -120,6 +145,7 @@ function tc_sandbot_opengui(p: player):
 
 	open {_gui} to {_p}
 
+# Define a function to open the sandbot list GUI.
 function fc_sandbot_openlistgui(p: player, faction: text):
 	set {_gui} to chest inventory with fc_config_manager_getvalue("sandbots", "list-gui.rows") rows named fc_config_manager_getvalue("sandbots", "list-gui.name")
 	set slot (all integers between 0 and 54) of {_gui} to fc_config_manager_getvalue("sandbots", "list-gui.fill-item") parsed as item named "&7"
@@ -146,6 +172,7 @@ function fc_sandbot_openlistgui(p: player, faction: text):
 		set slot {_slot} of {_gui} to {_item}
 	open {_gui} to {_p}
 
+# Define actions to take when a block is placed.
 on place:
 	set {_var} to string tag "custom;sandbot_isreal" of nbt compound of player's tool
 	"%{_var}%" is "true"
@@ -177,6 +204,7 @@ on place:
 
 	send fc_config_manager_getvalue("sandbots", "messages.placed-sandbot")
 
+# Define actions to take when a block is broken.
 on break:
 	event-block is fc_config_manager_getvalue("sandbots", "sandbot.item.type") parsed as item type
 	set {_sandbot-faction} to string tag "custom;sandbot_faction" of nbt of event-block
@@ -186,6 +214,7 @@ on break:
 	send fc_config_manager_getvalue("sandbots", "messages.broken-sandbot")
 	drop fc_sandbot_generateitem() at event-location
 
+# Define actions to take when a block is right-clicked.
 on right click:
 	event-block is fc_config_manager_getvalue("sandbots", "sandbot.item.type") parsed as item type
 	set {_sandbot-faction} to string tag "custom;sandbot_faction" of nbt of event-block
@@ -279,6 +308,7 @@ on inventory click:
 	else if index of clicked slot is fc_config_manager_getvalue("sandbots", "gui.list.slot"):
 		fc_sandbot_openlistgui(player, "%{_faction}%")
 
+# Define actions to take when a player clicks an inventory item.
 on inventory click:
 	name of player's current inventory is fc_config_manager_getvalue("sandbots", "list-gui.name")
 	cancel event

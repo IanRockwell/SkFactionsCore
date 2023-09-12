@@ -1,163 +1,201 @@
 import:
-	com.massivecraft.factions.FLocation
-	com.massivecraft.factions.Board
-	com.massivecraft.factions.Faction
-	com.massivecraft.factions.Factions
-	com.massivecraft.factions.FPlayer
-	com.massivecraft.factions.FPlayers
+    com.massivecraft.factions.FLocation
+    com.massivecraft.factions.Board
+    com.massivecraft.factions.Faction
+    com.massivecraft.factions.Factions
+    com.massivecraft.factions.FPlayer
+    com.massivecraft.factions.FPlayers
 
+# Define a command '/gen' with an optional argument.
 command /gen [<text>]:
-	description: FactionCore's genbucket shop command
-	trigger:
-		fc_genbucket_opengui(player)
+    description: FactionCore's genbucket shop command
+    trigger:
+        # Trigger the 'fc_genbucket_opengui' function when the command is executed with a player argument.
+        fc_genbucket_opengui(player)
 
+# Function to make an item glow.
 function fc_genbuckets_makeglow(i: item) :: item:
-	enchant {_i} with unbreaking 1
-	return {_i} with all flags hidden
+    # Add the 'unbreaking' enchantment to the item.
+    enchant {_i} with unbreaking 1
+    # Hide all item flags.
+    return {_i} with all flags hidden
 
+# Function to generate blocks downward.
 function fc_genbuckets_generate_down(location: location, faction: text, bucket: text):
 
-	set {_allowed-blocks-strings::*} to fc_config_manager_getlist("genbuckets", "settings.ignore-blocks")
-	loop {_allowed-blocks-strings::*}:
-		add loop-value parsed as item type to {_allowed-blocks::*}
+    # Get a list of block types to ignore from the configuration.
+    set {_allowed-blocks-strings::*} to fc_config_manager_getlist("genbuckets", "settings.ignore-blocks")
+    loop {_allowed-blocks-strings::*}:
+        add loop-value parsed as item type to {_allowed-blocks::*}
 
-	set {_speed} to fc_config_manager_getvalue("genbuckets", "settings.speed")
-	set {_speed-timespan} to "%{_speed}% ticks" parsed as timespan
-	set {_block} to fc_config_manager_getvalue("genbuckets", "buckets.%{_bucket}%.type") parsed as item type
+    # Get the speed and convert it into a timespan.
+    set {_speed} to fc_config_manager_getvalue("genbuckets", "settings.speed")
+    set {_speed-timespan} to "%{_speed}% ticks" parsed as timespan
+    set {_block} to fc_config_manager_getvalue("genbuckets", "buckets.%{_bucket}%.type") parsed as item type
 
-	loop 383 times:
-		{_allowed-blocks::*} contains block at {_location}
-		set block at {_location} to {_block}
-		subtract 1 from y coordinate of {_location}
-		wait {_speed-timespan}
+    # Generate blocks downward.
+    loop 383 times:
+        {_allowed-blocks::*} contains block at {_location}
+        set block at {_location} to {_block}
+        subtract 1 from y coordinate of {_location}
+        wait {_speed-timespan}
 
+# Function to generate blocks upward.
 function fc_genbuckets_generate_up(location: location, faction: text, bucket: text):
 
-	set {_allowed-blocks-strings::*} to fc_config_manager_getlist("genbuckets", "settings.ignore-blocks")
-	loop {_allowed-blocks-strings::*}:
-		add loop-value parsed as item type to {_allowed-blocks::*}
+    # Get a list of block types to ignore from the configuration.
+    set {_allowed-blocks-strings::*} to fc_config_manager_getlist("genbuckets", "settings.ignore-blocks")
+    loop {_allowed-blocks-strings::*}:
+        add loop-value parsed as item type to {_allowed-blocks::*}
 
-	set {_speed} to fc_config_manager_getvalue("genbuckets", "settings.speed")
-	set {_speed-timespan} to "%{_speed}% ticks" parsed as timespan
-	set {_block} to fc_config_manager_getvalue("genbuckets", "buckets.%{_bucket}%.type") parsed as item type
+    # Get the speed and convert it into a timespan.
+    set {_speed} to fc_config_manager_getvalue("genbuckets", "settings.speed")
+    set {_speed-timespan} to "%{_speed}% ticks" parsed as timespan
+    set {_block} to fc_config_manager_getvalue("genbuckets", "buckets.%{_bucket}%.type") parsed as item type
 
-	loop 383 times:
-		{_allowed-blocks::*} contains block at {_location}
-		set block at {_location} to {_block}
-		add 1 to y coordinate of {_location}
-		wait {_speed-timespan}
+    # Generate blocks upward.
+    loop 383 times:
+        {_allowed-blocks::*} contains block at {_location}
+        set block at {_location} to {_block}
+        add 1 to y coordinate of {_location}
+        wait {_speed-timespan}
 
+# Function to generate blocks horizontally.
 function fc_genbuckets_generate_hori(location: location, faction: text, facing: text, bucket: text):
 
-	set {_allowed-blocks-strings::*} to fc_config_manager_getlist("genbuckets", "settings.ignore-blocks")
-	loop {_allowed-blocks-strings::*}:
-		add loop-value parsed as item type to {_allowed-blocks::*}
+    # Get a list of block types to ignore from the configuration.
+    set {_allowed-blocks-strings::*} to fc_config_manager_getlist("genbuckets", "settings.ignore-blocks")
+    loop {_allowed-blocks-strings::*}:
+        add loop-value parsed as item type to {_allowed-blocks::*}
 
-	set {_speed} to fc_config_manager_getvalue("genbuckets", "settings.speed")
-	set {_speed-timespan} to "%{_speed}% ticks" parsed as timespan
-	set {_block} to fc_config_manager_getvalue("genbuckets", "buckets.%{_bucket}%.type") parsed as item type
+    # Get the speed and convert it into a timespan.
+    set {_speed} to fc_config_manager_getvalue("genbuckets", "settings.speed")
+    set {_speed-timespan} to "%{_speed}% ticks" parsed as timespan
+    set {_block} to fc_config_manager_getvalue("genbuckets", "buckets.%{_bucket}%.type") parsed as item type
 
-	set {_amount} to fc_config_manager_getvalue("genbuckets", "settings.horizontal-distance")
+    # Get the horizontal distance from the configuration.
+    set {_amount} to fc_config_manager_getvalue("genbuckets", "settings.horizontal-distance")
 
-	if {_facing} is "east":
-		set {_horizontal-dir} to "west"
-	else if {_facing} is "west":
-		set {_horizontal-dir} to "east"
-	if {_facing} is "north":
-		set {_horizontal-dir} to "south"
-	else if {_facing} is "south":
-		set {_horizontal-dir} to "north"
-	loop {_amount} times:
-		if {_allowed-blocks::*} does not contain block at {_location}:
-			stop
-	
-		set {_block-faction} to Board.getInstance().getFactionAt(new FLocation({_location}))
-		set {_block-faction.name} to uncoloured {_block-faction}.getTag()
-		set {_block-faction.id} to Factions.getInstance().getByTag("%{_block-faction.name}%").getId()
-		if {_faction} is not {_block-faction.id}:
-			stop
+    # Determine the horizontal direction based on the player's facing direction.
+    if {_facing} is "east":
+        set {_horizontal-dir} to "west"
+    else if {_facing} is "west":
+        set {_horizontal-dir} to "east"
+    if {_facing} is "north":
+        set {_horizontal-dir} to "south"
+    else if {_facing} is "south":
+        set {_horizontal-dir} to "north"
 
-		set block at {_location} to {_block}
-		wait {_speed-timespan}
+    # Loop to generate blocks horizontally.
+    loop {_amount} times:
+        if {_allowed-blocks::*} does not contain block at {_location}:
+            stop
 
-		if {_horizontal-dir} is "east":
-			set {_location} to location of block 1 meters east of {_location}
-		else if {_horizontal-dir} is "west":
-			set {_location} to location of block 1 meters west of {_location}
-		else if {_horizontal-dir} is "north":
-			set {_location} to location of block 1 meters north of {_location}
-		else if {_horizontal-dir} is "south":
-			set {_location} to location of block 1 meters south of {_location}
+        # Get the faction owning the block at the current location.
+        set {_block-faction} to Board.getInstance().getFactionAt(new FLocation({_location}))
+        set {_block-faction.name} to uncoloured {_block-faction}.getTag()
+        set {_block-faction.id} to Factions.getInstance().getByTag("%{_block-faction.name}%").getId()
 
+        # Check if the player's faction matches the faction owning the block.
+        if {_faction} is not {_block-faction.id}:
+            stop
+
+        # Set the block at the current location and wait for the specified time.
+        set block at {_location} to {_block}
+        wait {_speed-timespan}
+
+        # Update the location based on the horizontal direction.
+        if {_horizontal-dir} is "east":
+            set {_location} to location of block 1 meters east of {_location}
+        else if {_horizontal-dir} is "west":
+            set {_location} to location of block 1 meters west of {_location}
+        else if {_horizontal-dir} is "north":
+            set {_location} to location of block 1 meters north of {_location}
+        else if {_horizontal-dir} is "south":
+            set {_location} to location of block 1 meters south of {_location}
+
+# Function to generate a genbucket item.
 function fc_genbuckets_generatebucket(name: text) :: item:
-	set {_type} to fc_config_manager_getvalue("genbuckets", "buckets.%{_name}%.item") parsed as item type
-	set {_lore::*} to colored fc_config_manager_getlist("genbuckets", "buckets.%{_name}%.lore")
-	set {_item-name} to fc_config_manager_getvalue("genbuckets", "buckets.%{_name}%.name")
-	set {_item} to {_type} named {_item-name} with lore {_lore::*}
-	if fc_config_manager_getvalue("genbuckets", "buckets.%{_name}%.glowing") is true:
-		set {_item} to fc_genbuckets_makeglow({_item})
-	set string tag "custom;genbucket_id" of nbt compound of {_item} to {_name}
-	return {_item}
+    # Get the item type, lore, and name from the configuration.
+    set {_type} to fc_config_manager_getvalue("genbuckets", "buckets.%{_name}%.item") parsed as item type
+    set {_lore::*} to colored fc_config_manager_getlist("genbuckets", "buckets.%{_name}%.lore")
+    set {_item-name} to fc_config_manager_getvalue("genbuckets", "buckets.%{_name}%.name")
+    set {_item} to {_type} named {_item-name} with lore {_lore::*}
+    # Check if the genbucket should glow and apply the glow effect if needed.
+    if fc_config_manager_getvalue("genbuckets", "buckets.%{_name}%.glowing") is true:
+        set {_item} to fc_genbuckets_makeglow({_item})
+    # Set a custom tag for the genbucket item.
+    set string tag "custom;genbucket_id" of nbt compound of {_item} to {_name}
+    return {_item}
 
+# Function to open the genbucket shop GUI for a player.
 function fc_genbucket_opengui(p: player):
-	set {_gui} to chest inventory with fc_config_manager_getvalue("genbuckets", "gui.rows") rows named fc_config_manager_getvalue("genbuckets", "gui.name")
-	set slot (all integers between 0 and 54) of {_gui} to fc_config_manager_getvalue("genbuckets", "gui.fill-item") parsed as item named "&7"
-	
-	set {_buckets::*} to fc_config_manager_returnnodelist("genbuckets", "buckets")
-	loop {_buckets::*}:
-		set {_slot} to fc_config_manager_getvalue("genbuckets", "buckets.%loop-value%.slot")
-		set slot {_slot} of {_gui} to fc_genbuckets_generatebucket(loop-value)
+    # Create a chest inventory with specified rows and name from the configuration.
+    set {_gui} to chest inventory with fc_config_manager_getvalue("genbuckets", "gui.rows") rows named fc_config_manager_getvalue("genbuckets", "gui.name")
+    # Fill all slots in the GUI with a specified fill item.
+    set slot (all integers between 0 and 54) of {_gui} to fc_config_manager_getvalue("genbuckets", "gui.fill-item") parsed as item named "&7"
 
-	open {_gui} to {_p}
+    # Get a list of genbuckets from the configuration and generate items in the GUI.
+    set {_buckets::*} to fc_config_manager_returnnodelist("genbuckets", "buckets")
+    loop {_buckets::*}:
+        set {_slot} to fc_config_manager_getvalue("genbuckets", "buckets.%loop-value%.slot")
+        set slot {_slot} of {_gui} to fc_genbuckets_generatebucket(loop-value)
 
+    # Open the GUI for the player.
+    open {_gui} to {_p}
+
+# Event handler for inventory click.
 on inventory click:
-	name of player's current inventory is fc_config_manager_getvalue("genbuckets", "gui.name")
-	cancel event
-	clicked inventory is player's current inventory
+    # Check if the player's current inventory matches the genbucket shop GUI.
+    name of player's current inventory is fc_config_manager_getvalue("genbuckets", "gui.name")
+    cancel event
+    clicked inventory is player's current inventory
 
-	set {_nbt} to nbt compound of clicked slot
-	set {_bucket} to string tag "custom;genbucket_id" of {_nbt}
-	
-	{_bucket} is not ""
+    # Get the genbucket ID from the clicked item's custom tag.
+    set {_nbt} to nbt compound of clicked slot
+    set {_bucket} to string tag "custom;genbucket_id" of {_nbt}
 
-	add fc_genbuckets_generatebucket({_bucket}) to player's inventory
-	close player's inventory
+    # Check if a valid genbucket ID is found and add it to the player's inventory.
+    {_bucket} is not ""
+    add fc_genbuckets_generatebucket({_bucket}) to player's inventory
+    close player's inventory
 
+# Event handler for block placement.
 on place:
-	set {_bucket} to string tag "custom;genbucket_id" of nbt compound of player's tool
-	{_bucket} is not ""
-	cancel event
+    # Get the genbucket ID from the player's held tool.
+    set {_bucket} to string tag "custom;genbucket_id" of nbt compound of player's tool
+    {_bucket} is not ""
+    cancel event
 
-	set {_cost} to fc_config_manager_getvalue("genbuckets", "buckets.%{_bucket}%.cost")
-	if player's balance is less than {_cost}:
-		send fc_config_manager_getvalue("genbuckets", "messages.not-enough-money")
-		stop
-	
-	set {_player-faction} to FPlayers.getInstance().getByPlayer(player).getFaction()
-	set {_player-faction.name} to uncoloured {_player-faction}.getTag()
-	set {_player-faction.id} to Factions.getInstance().getByTag("%{_player-faction.name}%").getId()
+    # Get the cost of the genbucket and check if the player has enough money.
+    set {_cost} to fc_config_manager_getvalue("genbuckets", "buckets.%{_bucket}%.cost")
+    if player's balance is less than {_cost}:
+        send fc_config_manager_getvalue("genbuckets", "messages.not-enough-money")
+        stop
 
-	set {_block-faction} to Board.getInstance().getFactionAt(new FLocation(event-location))
-	set {_block-faction.name} to uncoloured {_block-faction}.getTag()
-	set {_block-faction.id} to Factions.getInstance().getByTag("%{_block-faction.name}%").getId()
+    # Get the player's faction and the faction owning the block where the genbucket is placed.
+    set {_player-faction} to FPlayers.getInstance().getByPlayer(player).getFaction()
+    set {_player-faction.name} to uncoloured {_player-faction}.getTag()
+    set {_player-faction.id} to Factions.getInstance().getByTag("%{_player-faction.name}%").getId()
+    set {_block-faction} to Board.getInstance().getFactionAt(new FLocation(event-location))
+    set {_block-faction.name} to uncoloured {_block-faction}.getTag()
+    set {_block-faction.id} to Factions.getInstance().getByTag("%{_block-faction.name}%").getId()
 
-	if {_block-faction.id} is not {_player-faction.id}:
-		send fc_config_manager_getvalue("genbuckets", "messages.not-in-your-claim")
-		stop
+    # Check if the player's faction matches the faction owning the block.
+    if {_block-faction.id} is not {_player-faction.id}:
+        send fc_config_manager_getvalue("genbuckets", "messages.not-in-your-claim")
+        stop
 
-	subtract {_cost} from player's balance
+    # Deduct the cost from the player's balance and remove the placed block.
+    subtract {_cost} from player's balance
+    set block at event-location to air
+    wait 1 tick
 
-	set block at event-location to air
-
-	wait 1 tick
-
-	set {_type} to fc_config_manager_getvalue("genbuckets", "buckets.%{_bucket}%.dir")
-
-	if {_type} is "down":
-		fc_genbuckets_generate_down(event-location, {_player-faction.id}, {_bucket})
-
-	else if {_type} is "up":
-		fc_genbuckets_generate_up(event-location, {_player-faction.id}, {_bucket})
-	
-	else if {_type} is "horizontal":
-		fc_genbuckets_generate_hori(event-location, {_player-faction.id}, "%horizontal facing of player%", {_bucket})
+    # Determine the type of genbucket and call the corresponding generation function.
+    set {_type} to fc_config_manager_getvalue("genbuckets", "buckets.%{_bucket}%.dir")
+    if {_type} is "down":
+        fc_genbuckets_generate_down(event-location, {_player-faction.id}, {_bucket})
+    else if {_type} is "up":
+        fc_genbuckets_generate_up(event-location, {_player-faction.id}, {_bucket})
+    else if {_type} is "horizontal":
+        fc_genbuckets_generate_hori(event-location, {_player-faction.id}, "%horizontal facing of player%", {_bucket})
