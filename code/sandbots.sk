@@ -189,6 +189,12 @@ on right click:
 	event-block is fc_config_manager_getvalue("sandbots", "sandbot.item.type") parsed as item type
 	set {_sandbot-faction} to int tag "custom;sandbot_faction" of nbt of event-block
 	{_sandbot-faction} is set
+
+	set {_player-faction} to FPlayers.getInstance().getByPlayer(player).getFaction()
+	set {_player-faction.name} to uncoloured {_player-faction}.getTag()
+	set {_player-faction.id} to Factions.getInstance().getByTag("%{_player-faction.name}%").getId()
+	{_player-faction.id} is {_sandbot-faction}
+
 	cancel event
 	set metadata value "FC;SandbotLocation" of player to location of event-block
 	tc_sandbot_opengui(player)
@@ -307,7 +313,8 @@ every 0.3 seconds:
 
 on load:
 	loop {sandbot-toggled::*}:
-		delete {sandbot-toggled::%loop-index%}
+		set {_location} to fc_data_manager_getvalue("sandbots", "%loop-value%.location")
 		set string tag "custom;sandbot_toggled" of nbt compound of block at {_location} to "false"
 		fc_data_manager_setvalue("sandbots", "%loop-value%.toggled", "false")
 		fc_data_manager_dellist("sandbots", "%loop-value%.locations")
+		delete {sandbot-toggled::%loop-index%}
