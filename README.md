@@ -2,10 +2,8 @@
 A completely open source Minecraft Factions Core written completely in Skript
 
 ## Features
-`Sandbots` <br />
-`Genbuckets` <br />
-`Freecam` <br />
-`Graceperiod` <br />
+
+- [Click Here For a Full List of Featues](https://github.com/IanRockwell/SkFactionsCore/wiki/)
 
 ## Dependencies
 `Plugins:` <br />
