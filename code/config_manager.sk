@@ -1,5 +1,5 @@
 options:
-    main_directory: plugins/Skript/scripts/FactionsCore/configs
+    main_directory: plugins/Skript/scripts/SkFactionsCore/configs
     
     configs: "sandbots" and "shields"
 

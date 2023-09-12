@@ -1,5 +1,5 @@
 options:
-    main_directory: plugins/Skript/scripts/FactionsCore/data
+    main_directory: plugins/Skript/scripts/SkFactionsCore/data
 
     data: "players", "factions" and "sandbots"
 on load:
