@@ -7,7 +7,7 @@ import:
 	com.massivecraft.factions.FPlayers
 
 command /sandbot [<text>] [<offline player>] [<integer>]:
-	description: FactionCore's Sandbot Command
+	description: FactionCore's sandbot command
 	permission: fc.sandbot.admin
 	trigger:
 		if arg 1 is "give":
@@ -311,6 +311,7 @@ every 0.3 seconds:
 			{_blocks-placed} is set
 			subtract {_sand-price} * size of {_blocks::*} from {_balance}
 			fc_data_manager_setvalue("sandbots", "%loop-value%.balance", {_balance})
+		wait 1 tick
 
 on load:
 	loop {sandbot-toggled::*}:
