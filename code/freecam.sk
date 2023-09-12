@@ -1,0 +1,88 @@
+# Define a custom command /freecam with an alias /roam.
+command /freecam [<text>]:
+    aliases: /roam
+    description: FactionCore's freecam command
+    permission: fc.freecam
+    trigger:
+        # Check if the player's UUID is set in the 'roam' data store.
+        if {roam::%uuid of player%} is set:
+            # Disable freecam mode and send a message.
+            fc_freecam_disable(player)
+            send fc_config_manager_getvalue("freecam", "messages.freecam-mode-disabled")
+        else:
+            # Enable freecam mode and send a message.
+            fc_freecam_enable(player, player's location)
+            send fc_config_manager_getvalue("freecam", "messages.freecam-mode-enabled")
+
+# Define a function to disable freecam mode for a player.
+function fc_freecam_disable(p: player):
+    set {_uuid} to uuid of {_p}
+    set {_l} to {roam::%{_uuid}%}
+    delete {roam::%{_uuid}%}
+
+    # Loop through entities within a radius of 0.7 from the player's freecam location.
+    loop all entities in radius 0.7 of {_l}:
+        loop-entity is a zombie
+        {roam-entities::%loop-entity's uuid%} is {_uuid}
+        delete {roam-entities::%loop-entity's uuid%}
+        delete loop-entity
+        exit 1 loop
+    
+    set {_p}'s gamemode to survival
+    teleport {_p} to {_l}
+
+# Define a function to enable freecam mode for a player at a specific location.
+function fc_freecam_enable(p: player, l: location):
+    set {_uuid} to uuid of {_p}
+    set {roam::%{_uuid}%} to {_l}
+
+    # Spawn a zombie at the freecam location and configure it.
+    spawn zombie at {_l}
+    set int tag "NoAI" of nbt compound of last spawned zombie to 1
+    set last spawned zombie's helmet to {_p}'s skull
+    set {roam-entities::%last spawned zombie's uuid%} to {_uuid}
+
+    set {_p}'s gamemode to spectator
+
+    set {_distance} to fc_config_manager_getvalue("freecam", "freecam.max-distance")
+
+    # Continuously check if the player goes out of range and teleport them back.
+    while {roam::%{_uuid}%} is set:
+        if distance between {roam::%{_uuid}%} and {_p}'s location is greater than {_distance}:
+            teleport {_p} to {roam::%{_uuid}%}
+            send fc_config_manager_getvalue("freecam", "messages.went-out-of-range") to {_p}
+        wait 5 ticks
+
+# Stop player from interacting with blocks while in freecam mode
+on right click:
+    {roam::%uuid of player%} is set
+    send fc_config_manager_getvalue("freecam", "messages.cannot-interact")
+    cancel event
+
+# Define actions when a roam zombie takes damage.
+on damage:
+    victim is a zombie
+    {roam-entities::%victim's uuid%} is set
+    cancel event
+    set {_p} to {roam-entities::%victim's uuid%} parsed as player
+    send fc_config_manager_getvalue("freecam", "messages.kicked-out-of-freecam") to {_p}
+    fc_freecam_disable({_p})
+
+# Disable player from using disallowed commands in freecam.
+on command:
+    {roam::%uuid of player%} is set
+    set {_whitelist-commands::*} to fc_config_manager_getlist("freecam", "freecam.whitelist-commands")
+    loop {_whitelist-commands::*}:
+        full command is loop-value
+        stop
+    cancel event
+    send fc_config_manager_getvalue("freecam", "messages.command-not-allowed")
+
+# Actions to take when a player connects or disconnects while in freecam mode.
+on connect:
+    {roam::%uuid of player%} is set
+    fc_freecam_disable(player)
+
+on disconnect:
+    {roam::%uuid of player%} is set
+    fc_freecam_disable(player)

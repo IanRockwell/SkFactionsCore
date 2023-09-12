@@ -1,0 +1,13 @@
+messages:
+  freecam-mode-enabled: "&7You have successfully enabled &b&nFreecam Mode&7."
+  freecam-mode-disabled: "&7You have successfully disabled &b&nFreecam Mode&7."
+  cannot-interact: "&cYou are not allowed to interact with blocks in &nFreecam Mode&c."
+  command-not-allowed: "&cThis command is not allowed while in &nFreecam Mode&c."
+  kicked-out-of-freecam: "&cYou have been kicked out of &nFreecam Mode&c."
+  went-out-of-range: "&cYou must stay within 300 blocks of your origin while in &nFreecam Mode&c."
+
+freecam:
+  max-distance: 300
+  whitelist-commands:
+    - "freecam"
+    - "roam"
