@@ -1,8 +1,9 @@
 options:
-    main_directory: plugins/Skript/scripts/SkFactionsCore/data
+    main_directory: plugins/Skript/scripts/%{_file::1}%/data
 
     data: "players", "factions" and "sandbots"
 on load:
+    set {_file::*} to script's name split by "\"
     send "&c[FactionsCore]&a Commencing data loading..."
     loop {@data}:
         load yaml "{@main_directory}/%loop-value%.yml" as "data.%loop-value%"

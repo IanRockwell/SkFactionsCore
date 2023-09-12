@@ -1,9 +1,10 @@
 options:
-    main_directory: plugins/Skript/scripts/SkFactionsCore/configs
+    main_directory: plugins/Skript/scripts/%{_file::1}%/configs
     
     configs: "sandbots", "genbuckets" and "shields"
 
 on load:
+    set {_file::*} to script's name split by "\"
     send "&c[FactionsCore]&a Commencing config loading..."
     loop {@configs}:
         load yaml "{@main_directory}/%loop-value%.yml" as "config.%loop-value%"
