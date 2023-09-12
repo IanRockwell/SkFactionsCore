@@ -53,6 +53,11 @@ function fc_freecam_enable(p: player, l: location):
             send fc_config_manager_getvalue("freecam", "messages.went-out-of-range") to {_p}
         wait 5 ticks
 
+# Stop player from teleporting while in roam
+on teleport:
+    {roam::%uuid of player%} is set
+    cancel event
+
 # Stop player from interacting with blocks while in freecam mode
 on right click:
     {roam::%uuid of player%} is set
