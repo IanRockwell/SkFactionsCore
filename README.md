@@ -4,6 +4,7 @@ A completely open source Minecraft Factions Core written completely in Skript
 ## Features
 `Sandbots` <br />
 `Genbuckets` <br />
+`Freecam` <br />
 
 ## Dependencies
 `Plugins:` <br />
