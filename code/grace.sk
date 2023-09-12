@@ -1,0 +1,66 @@
+command /grace [<text>]:
+    aliases: /graceperiod
+    description: FactionCore's graceperiod command.
+    trigger:
+        if arg 1 is not set:
+            if {graceperiod} is set:
+                set {_time-left} to difference between now and {graceperiod}
+                set {_time-left-formatted} to fc_grace_formattime({_time-left})
+                set {_message} to fc_config_manager_getvalue("grace", "messages.grace-countdown-command")
+                replace all "{time}" with {_time-left-formatted} in {_message}
+                send {_message}
+            else:
+                set {_message} to fc_config_manager_getvalue("grace", "messages.grace-not-active-command")
+                send {_message}
+            stop
+        if player does not have permission "fc.grace.admin":
+            send "You don't have the required permission to use this command."
+            stop
+        if arg 1 is "start":
+            if {graceperiod} is set:
+                send "&cThe &nGraceperiod&c is already active."
+                stop
+            fc_grace_start()
+        else if arg 1 is "end":
+            if {graceperiod} is not set:
+                send "&cThere is no &nGraceperiod&c currently active, to end."
+                stop
+            fc_grace_end()
+        else:
+            send "&e/grace &7- &fView the current time left on the graceperiod."
+            send "&e/grace start &7- &fStart the graceperiod timer."
+            send "&e/grace end &7- &fForcefully end the graceperiod."
+
+on explosion:
+    {graceperiod} is set
+    cancel event
+
+every second:
+    {graceperiod} is set
+    set {_time-left} to time since {graceperiod}
+    {_time-left} is set
+    fc_grace_end()
+
+function fc_grace_start():
+    set {_countdown} to fc_config_manager_getvalue("grace", "grace.length") parsed as timespan
+    set {graceperiod} to now
+    add {_countdown} to {graceperiod}
+    broadcast formatted fc_config_manager_getvalue("grace", "messages.grace-started-announcement")
+
+function fc_grace_end():
+    delete {graceperiod}
+    broadcast formatted fc_config_manager_getvalue("grace", "messages.grace-ended-announcement")
+
+function fc_grace_formattime(t: timespan) :: text:
+    set {_time} to ({_t} in ticks) / 20
+    set {_d} to rounded down ((({_time}/60)/60)/24)
+    remove {_d}*60*60*24 from {_time}
+    set {_h} to rounded down ((({_time}/60)/60))
+    remove {_h}*60*60 from {_time}
+    set {_m} to rounded down ((({_time}/60)))
+    remove {_m}*60 from {_time}
+    set {_s} to rounded down ((({_time})))
+    loop "d", "h", "m" and "s":
+        if {_%loop-value%} is not 0:
+            add "%{_%loop-value%}%%loop-value%" to {_t::*}
+    return join {_t::*} by ", "

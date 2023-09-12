@@ -1,0 +1,8 @@
+messages:
+  grace-countdown-command: "&eThe &nGrace Period&e will end in &b{time}&e."
+  grace-not-active-command: "&eThe &nGrace Period&e is currently &cInactive&e."
+  grace-ended-announcement: "&7\n&c&lGRACE PERIOD HAS ENDED\n&7Explosions are now enabled!\n&7"
+  grace-started-announcement: "&7\n&a&lGRACE PERIOD HAS STARTED\n&7Explosions will be disabled for the next &n7 days&7.\n&7"
+
+grace:
+  length: "7 days" # How long the grace period is from when /grace start is run.
