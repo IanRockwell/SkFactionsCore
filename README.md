@@ -14,3 +14,4 @@ A completely open source Minecraft Factions Core written completely in Skript
 `Skript Addons:` <br />
 `  Skript-YAML` <br />
 `  Skript-Reflect` <br />
+`  SkJade` <br />
