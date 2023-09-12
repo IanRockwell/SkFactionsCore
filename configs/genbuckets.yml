@@ -1,0 +1,154 @@
+messages:
+  not-enough-money: "&cYou do not have enough money to place this &nGenbucket&c."
+  not-in-your-claim: "&cYou can only place genbuckets within your own claim."
+
+gui:
+  name: "&8Genbucket Menu" # Make sure the name of this GUI is unique
+  rows: 5
+  fill-item: "BLACK STAINED GLASS PANE"
+
+settings:
+  speed: 5 # How many ticks inbetween generating a block with a genbucket
+  horizontal-distance: 48 # How many blocks horizontal genbuckets generate
+  ignore-blocks: # What blocks do you want the genbucket to ignore?
+    - "AIR"
+    - "WATER"
+    - "LAVA"
+
+buckets:
+  cobblestone_down: # The unique ID for this genbucket
+    type: "COBBLESTONE" # What block do you want the genbucket to generate?
+    item: "COBBLESTONE" # What block do you want the actual genbucket to be
+    dir: "down" # What direction do you want the genbucket to go (up, down, horizontal)
+    glowing: true # Do you want the genbucket to have enchantment glint?
+    cost: 100 # How much it costs to place this genbucket
+    slot: 10 # What slot will this genbucket be in the /gen GUI?
+    name: "&6Downwards Cobblestone Genbucket"
+    lore:
+      - ""
+      - "&7An infinite cobblestone genbucket."
+      - ""
+      - "&6&lINFORMATION:"
+      - "&7  Block: &fCobblestone"
+      - "&7  Direction: &fDown"
+      - "&7  Cost (per): &a$100"
+      - ""
+  cobblestone_up:
+    type: "COBBLESTONE"
+    item: "COBBLESTONE"
+    dir: "up"
+    glowing: true
+    cost: 100
+    slot: 11
+    name: "&6Upwards Cobblestone Genbucket"
+    lore:
+      - ""
+      - "&7An infinite cobblestone genbucket."
+      - ""
+      - "&6&lINFORMATION:"
+      - "&7  Block: &fCobblestone"
+      - "&7  Direction: &fUp"
+      - "&7  Cost (per): &a$100"
+      - ""
+  cobblestone_horizontal:
+    type: "COBBLESTONE"
+    item: "COBBLESTONE"
+    dir: "horizontal"
+    glowing: true
+    cost: 100
+    slot: 12
+    name: "&6Horizontal Cobblestone Genbucket"
+    lore:
+      - ""
+      - "&7An infinite cobblestone genbucket."
+      - ""
+      - "&6&lINFORMATION:"
+      - "&7  Block: &fCobblestone"
+      - "&7  Direction: &fHorizontal"
+      - "&7  Cost (per): &a$100"
+      - ""
+  obsidian_down:
+    type: "OBSIDIAN"
+    item: "OBSIDIAN"
+    dir: "down"
+    glowing: true
+    cost: 1000
+    slot: 14
+    name: "&6Downwards Obsidian Genbucket"
+    lore:
+      - ""
+      - "&7An infinite obsidian genbucket."
+      - ""
+      - "&6&lINFORMATION:"
+      - "&7  Block: &fObsidian"
+      - "&7  Direction: &fDown"
+      - "&7  Cost (per): &a$1000"
+      - ""
+  obsidian_up:
+    type: "OBSIDIAN"
+    item: "OBSIDIAN"
+    dir: "up"
+    glowing: true
+    cost: 1000
+    slot: 15
+    name: "&6Upwards Obsidian Genbucket"
+    lore:
+      - ""
+      - "&7An infinite obsidian genbucket."
+      - ""
+      - "&6&lINFORMATION:"
+      - "&7  Block: &fObsidian"
+      - "&7  Direction: &fUp"
+      - "&7  Cost (per): &a$1000"
+      - ""
+  obsidian_hori:
+    type: "OBSIDIAN"
+    item: "OBSIDIAN"
+    dir: "horizontal"
+    glowing: true
+    cost: 1000
+    slot: 16
+    name: "&6Horizontal Obsidian Genbucket"
+    lore:
+      - ""
+      - "&7An infinite obsidian genbucket."
+      - ""
+      - "&6&lINFORMATION:"
+      - "&7  Block: &fObsidian"
+      - "&7  Direction: &fHorizontal"
+      - "&7  Cost (per): &a$1000"
+      - ""
+  sand_up:
+    type: "SAND"
+    item: "SAND"
+    dir: "up"
+    glowing: true
+    cost: 2000
+    slot: 30
+    name: "&6Upwards Sand Genbucket"
+    lore:
+      - ""
+      - "&7An infinite sand genbucket."
+      - ""
+      - "&6&lINFORMATION:"
+      - "&7  Block: &fSand"
+      - "&7  Direction: &fUp"
+      - "&7  Cost (per): &a$2000"
+      - ""
+  sand_regen:
+    type: "LAVA"
+    item: "LAVA BUCKET"
+    dir: "down"
+    glowing: true
+    cost: 10000
+    slot: 32
+    name: "&6Downwards Regen Genbucket"
+    lore:
+      - ""
+      - "&7An infinite regen genbucket."
+      - ""
+      - "&6&lINFORMATION:"
+      - "&7  Block: &fLava"
+      - "&7  Direction: &fDown"
+      - "&7  Cost (per): &a$10000"
+      - ""
