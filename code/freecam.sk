@@ -39,6 +39,7 @@ function fc_freecam_enable(p: player, l: location):
     # Spawn a zombie at the freecam location and configure it.
     spawn zombie at {_l}
     set int tag "NoAI" of nbt compound of last spawned zombie to 1
+    set int tag "Freecam_Zombie" of nbt compound of last spawned zombie to 1
     set last spawned zombie's helmet to {_p}'s skull
     set {roam-entities::%last spawned zombie's uuid%} to {_uuid}
 
