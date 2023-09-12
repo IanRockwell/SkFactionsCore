@@ -15,9 +15,8 @@ command /sandbot [<text>] [<offline player>] [<integer>]:
 				send "&cThe player you specified is not online."
 				stop
 			set {_amt} to arg 3 ? 1
-			set {_sandbot} to fc_sandbot_generateitem()
-			add {_amt} of {_sandbot} to arg 2's inventory
-			send "&aYou have given &n%arg 2%&a %{_amt}% x %name of {_sandbot}%&a."
+			add {_amt} of fc_sandbot_generateitem() to arg 2's inventory
+			send "&aYou have given &n%arg 2%&a %{_amt}% x %name of fc_sandbot_generateitem()%&a."
 			stop
 		send "&e/f sandbot &7- &fOpen the faction sandbot menu"
 		send "&e/sandbot give <player> <amount> &7- &fGive a player a sandbot"
@@ -78,6 +77,7 @@ function fc_sandbot_generateitem() :: item:
 	set {_item}'s lore to colored fc_config_manager_getlist("sandbots", "sandbot.item.lore")
 	if fc_config_manager_getvalue("sandbots", "sandbot.item.glowing") is true:
 		set {_item} to fc_sandbot_makeglow({_item})
+	set string tag "custom;sandbot_isreal" of nbt compound of {_item} to "true"
 	return {_item}
 
 function tc_sandbot_opengui(p: player):
@@ -147,8 +147,10 @@ function fc_sandbot_openlistgui(p: player, faction: text):
 	open {_gui} to {_p}
 
 on place:
-	1 of player's tool is fc_sandbot_generateitem()
+	set {_var} to string tag "custom;sandbot_isreal" of nbt compound of player's tool
+	"%{_var}%" is "true"
 	event is not cancelled
+	
 	set {_player-faction} to FPlayers.getInstance().getByPlayer(player).getFaction()
 	set {_player-faction.name} to uncoloured {_player-faction}.getTag()
 	if {_player-faction.name} is "Wilderness":
@@ -168,7 +170,6 @@ on place:
 		cancel event
 		send fc_config_manager_getvalue("sandbots", "messages.maximum-amount-of-sandbots")
 		stop
-
 	fc_sandbot_register(event-location, "%{_player-faction.id}%")
 
 	set string tag "custom;sandbot_faction" of nbt compound of event-block to "%{_player-faction.id}%"
@@ -187,7 +188,7 @@ on break:
 
 on right click:
 	event-block is fc_config_manager_getvalue("sandbots", "sandbot.item.type") parsed as item type
-	set {_sandbot-faction} to int tag "custom;sandbot_faction" of nbt of event-block
+	set {_sandbot-faction} to string tag "custom;sandbot_faction" of nbt of event-block
 	{_sandbot-faction} is set
 
 	set {_player-faction} to FPlayers.getInstance().getByPlayer(player).getFaction()

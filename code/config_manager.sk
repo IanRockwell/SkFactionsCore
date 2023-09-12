@@ -1,7 +1,7 @@
 options:
     main_directory: plugins/Skript/scripts/%{_file::1}%/configs
     
-    configs: "sandbots", "genbuckets" and "shields"
+    configs: "sandbots", "genbuckets", "roam" and "shields"
 
 on load:
     set {_file::*} to script's name split by "\"
