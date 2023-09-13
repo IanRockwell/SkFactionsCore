@@ -1,0 +1,11 @@
+messages:
+  must-be-in-a-faction: '&cYou must be in a faction to place a set a base region.'
+  must-be-in-your-own-claims: '&cYou can only set your base region in your own claims.'
+  must-be-a-leader: '&cYou must be a leader to set a base region.'
+  base-region-already-set: '&cYour faction has already set a base region.\n&7  You can move your base region with &b/f movebaseregion\n&7  You can update your base region with &b/f updatebaseregion'
+  starting-base-region-claim: '&eCalculating connected chunks for the &nBase Region&e...'
+  successfully-claimed-base-region: '&eYou have successfully claimed your base claim &8(&7{chunks} Chunks&8)'
+
+base_region:
+  radius: 20 # How many chunks in each direction should we try and calculate connected chunks?
+             # Keep in mind, the bigger this number gets, the longer it will take to calculate the base region.

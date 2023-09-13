@@ -1,0 +1,74 @@
+options:
+	radius: 20 # in chunks
+
+import:
+	com.massivecraft.factions.FLocation
+	com.massivecraft.factions.Board
+	com.massivecraft.factions.Faction
+	com.massivecraft.factions.Factions
+	com.massivecraft.factions.FPlayer
+	com.massivecraft.factions.FPlayers   
+
+on command "f":
+	set {_args::*} to full command split by " "
+	{_args::2} is "setbaseregion" or "setshieldregion"
+	cancel event
+
+	set {_player.role} to FPlayers.getInstance().getByPlayer(player).getRole()
+	set {_player-faction} to FPlayers.getInstance().getByPlayer(player).getFaction()
+	set {_player-faction.name} to uncoloured {_player-faction}.getTag()
+	if {_player-faction.name} is "Wilderness":
+		send fc_config_manager_getvalue("base_region", "messages.must-be-in-a-faction")
+		stop
+	
+	if "%{_player.role}%" is not "Leader":
+		send fc_config_manager_getvalue("base_region", "messages.must-be-a-leader")
+		stop
+	
+	set {_player-faction.id} to Factions.getInstance().getByTag("%{_player-faction.name}%").getId()
+	set {_faction-base-region::*} to fc_data_manager_getlist("base_region", "%{_player-faction.id}%.baseregion")
+	if {_faction-base-region::*} is set:
+		set {_message} to fc_config_manager_getvalue("base_region", "messages.base-region-already-set")
+		replace all "\n" with nl in {_message}
+		send formatted {_message}
+		stop
+	
+	set {_block-faction} to Board.getInstance().getFactionAt(new FLocation(player's location))
+	set {_block-faction.name} to uncoloured {_block-faction}.getTag()
+	if {_block-faction.name} is not {_player-faction.name}:
+		send fc_config_manager_getvalue("base_region", "messages.must-be-in-your-own-claims")
+		stop
+
+	set {_radius} to fc_config_manager_getvalue("base_region", "base_region.radius")
+	fc_base_region_setbaseregion(player, (player's location's chunk), {_radius}, "%{_player-faction}%", "%{_player-faction.id}%")
+
+function fc_base_region_setbaseregion(p: player, chunk: chunk, radius: integer, rawfaction: text, faction: text):
+	send fc_config_manager_getvalue("base_region", "messages.starting-base-region-claim") to {_p}
+	set {_location} to block at 0, 0, 0 in {_chunk}
+	add {_radius} * 16 to x coordinate of {_location}
+	add {_radius} * 16 to z coordinate of {_location}
+	set {_original_x} to x coordinate of {_location}
+	set {_radius} to {_radius} * 2
+	loop {_radius} times:
+		loop {_radius} times:
+			add {_location}'s chunk to {_chunks::*}
+			subtract 16 from x coordinate of {_location}
+		subtract 16 from z coordinate of {_location}
+		set x coordinate of {_location} to {_original_x}
+
+	set {_counter} to 0
+	loop {_chunks::*}:
+		add 1 to {_counter}
+		if {_counter} is 20:
+			set {_counter} to 0
+			wait 1 tick
+
+		set {_location} to block at 7, 0, 7 in loop-value
+		set {_f} to Board.getInstance().getFactionAt(new FLocation({_location}))
+		"%{_f}%" is "%{_rawfaction}%"
+		add loop-value to {_connected-chunks::*}
+
+	fc_data_manager_setlist("base_region", "%{_faction}%.baseregion", {_connected-chunks::*})
+	set {_message} to fc_config_manager_getvalue("base_region", "messages.successfully-claimed-base-region")
+	replace all "{chunks}" in {_message} with "%size of {_connected-chunks::*}%"
+	send {_message} to {_p}
