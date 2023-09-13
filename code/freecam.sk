@@ -48,6 +48,8 @@ function fc_freecam_enable(p: player, l: location):
     set {_distance} to fc_config_manager_getvalue("freecam", "freecam.max-distance")
 
     # Continuously check if the player goes out of range and teleport them back.
+    wait 5 ticks
+    
     while {roam::%{_uuid}%} is set:
         set {_dis} to distance between {roam::%{_uuid}%} and {_p}'s location
         if {_dis} is greater than {_distance}:
@@ -56,6 +58,20 @@ function fc_freecam_enable(p: player, l: location):
         set {_actionbar} to fc_config_manager_getvalue("freecam", "freecam.action-bar")
         replace all "{blocks}" in {_actionbar} with "%round({_dis})%"
         send action bar {_actionbar} to {_p}
+
+        delete {_zombie-still-alive}
+        loop all entities in radius 0.7 of {_l}:
+            loop-entity is a zombie
+            {roam-entities::%loop-entity's uuid%} is {_uuid}
+            set {_zombie-still-alive} to 1
+        
+        if {_zombie-still-alive} is not set:
+            send fc_config_manager_getvalue("freecam", "messages.zombie-no-longer-there") to {_p}
+            loop {roam-entities::*}:
+                loop-value is {_uuid}
+                delete {roam-entities::%loop-index%} 
+            fc_freecam_disable({_p})
+
         wait 5 ticks
 
 # Stop player from teleporting while in roam
