@@ -5,7 +5,6 @@ messages:
   command-not-allowed: "&cThis command is not allowed while in &nFreecam Mode&c."
   kicked-out-of-freecam: "&cYou have been kicked out of &nFreecam Mode&c."
   went-out-of-range: "&cYou must stay within 300 blocks of your origin while in &nFreecam Mode&c."
-  zombie-no-longer-there: "&cThe roam zombie NPC is no longer there (Perhaps clearlag or mob stacking?)"
 
 freecam:
   max-distance: 300
